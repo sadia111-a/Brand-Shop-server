@@ -27,11 +27,27 @@ async function run() {
     await client.connect();
 
     const productCollection = client.db("productDB").collection("product");
+    // const brandtCollection = client.db("brandDB").collection("cosmetics");
 
     app.get("/product", async (req, res) => {
       const cursor = productCollection.find();
       const result = await cursor.toArray();
       res.send(result);
+    });
+
+    app.get("/product/:brand_name", async (req, res) => {
+      const brand_name = req.params.brand_name;
+      const query = { brand_name: brand_name };
+      const products = await productCollection.find(query).toArray();
+      res.json(products);
+    });
+
+    app.get("/product/:id", async (req, res) => {
+      const productId = req.params.id;
+      const product = await productCollection.findOne({
+        _id: new ObjectId(productId),
+      });
+      res.json(product);
     });
 
     app.post("/product", async (req, res) => {
