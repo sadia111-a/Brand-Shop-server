@@ -24,30 +24,34 @@ const client = new MongoClient(uri, {
 async function run() {
   try {
     // Connect the client to the server	(optional starting in v4.7)
-    await client.connect();
+    // await client.connect();
 
     const productCollection = client.db("productDB").collection("product");
-    // const brandtCollection = client.db("brandDB").collection("cosmetics");
+    // const brandCollection = client.db("brandDB").collection("cosmetics");
 
     app.get("/product", async (req, res) => {
       const cursor = productCollection.find();
       const result = await cursor.toArray();
       res.send(result);
     });
+    // app.get("/brand", async (req, res) => {
+    //   const cursor = brandCollection.find();
+    //   const result = await cursor.toArray();
+    //   res.send(result);
+    // });
 
-    app.get("/product/:brand_name", async (req, res) => {
-      const brand_name = req.params.brand_name;
-      const query = { brand_name: brand_name };
-      const products = await productCollection.find(query).toArray();
-      res.json(products);
-    });
+    // app.get("/product/:brand_name", async (req, res) => {
+    //   const brand_name = req.params.brand_name;
+    //   const query = { brand_name: brand_name };
+    //   const products = await productCollection.find(query).toArray();
+    //   res.json(products);
+    // });
 
     app.get("/product/:id", async (req, res) => {
-      const productId = req.params.id;
-      const product = await productCollection.findOne({
-        _id: new ObjectId(productId),
-      });
-      res.json(product);
+      const id = req.params.id;
+      const query = { _id: new ObjectId(id) };
+      const result = await productCollection.findOne(query);
+      res.send(result);
     });
 
     app.post("/product", async (req, res) => {
@@ -61,16 +65,16 @@ async function run() {
       const id = req.params.id;
       const filter = { _id: new ObjectId(id) };
       const options = { upsert: true };
-      const updateProduct = req.body;
+      const updatedProduct = req.body;
       const product = {
         $set: {
-          brand_name: updateProduct.brand_name,
-          name: updateProduct.name,
-          type: updateProduct.type,
-          price: updateProduct.price,
-          rating: updateProduct.rating,
-          description: updateProduct.description,
-          photo: updateProduct.photo,
+          brand_name: updatedProduct.brand_name,
+          name: updatedProduct.name,
+          type: updatedProduct.type,
+          price: updatedProduct.price,
+          rating: updatedProduct.rating,
+          description: updatedProduct.description,
+          photo: updatedProduct.photo,
         },
       };
       const result = await productCollection.updateOne(
@@ -78,6 +82,7 @@ async function run() {
         product,
         options
       );
+      res.send(result);
     });
 
     app.delete("/product/:id", async (req, res) => {
@@ -88,7 +93,7 @@ async function run() {
     });
 
     // Send a ping to confirm a successful connection
-    await client.db("admin").command({ ping: 1 });
+    // await client.db("admin").command({ ping: 1 });
     console.log(
       "Pinged your deployment. You successfully connected to MongoDB!"
     );
